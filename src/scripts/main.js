@@ -9,21 +9,27 @@ const statFiles = Object.keys(stats);
 
 var edgeCounter = 0;
 
+var allFiles = statFiles.length;
+
 statFiles.forEach((file, i) => {
   g.nodes = g.nodes.concat({
     id: 'n' + i,
     label: file,
-    x: Math.random(),
-    y: Math.random(),
-    size: 1,
-    color: '#666'
+    x: Math.cos(i/allFiles * Math.PI * 2) + Math.sqrt(allFiles),
+    y: Math.sin(i/allFiles * Math.PI * 2) + Math.sqrt(allFiles),
+    size: 8,
+    color: '#12ef21'
   })
 
   stats[file].forEach(dep => {
     g.edges = g.edges.concat({
       id: 'e' + edgeCounter,
       source: 'n' + statFiles.indexOf(dep),
-      target: 'n' + i
+      target: 'n' + i,
+      arrow: "target",
+      type: "arrow",
+      size: 6,
+      color: '#a123d2'
     })
     edgeCounter += 1
   })
@@ -34,16 +40,9 @@ var s = new sigma({
   container: 'container',
   settings: {
     defaultNodeColor: '#ec5148',
-    minArrowSize: 3
+    maxNodeSize: 8,
+		minNodeSize: 8,
+		maxEdgeSize: 6,
+		minEdgeSize: 6
   }
 });
-
-var config = {
-  nodeMargin: 3.0,
-  scaleNodes: 1.3
-};
-
-// Configure the algorithm
-var listener = s.configNoverlap(config);
-
-s.startNoverlap();

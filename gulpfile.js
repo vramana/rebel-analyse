@@ -13,5 +13,5 @@ gulp.task('serve', () => {
 
   gulp.watch(['src/*.html'], reload);
   gulp.watch(['src/styles/**/*.css'], reload);
-  gulp.watch(['site/scripts/**/*.js'], reload);
+  gulp.watch(['src/scripts/**/*.js'], reload);
 })
