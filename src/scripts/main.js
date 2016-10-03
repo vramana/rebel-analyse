@@ -1,37 +1,77 @@
-var stats = { "D": [], "B": [ "D" ], "Index": [ "B", "D" ] };
+var stats = {
+  "Src": {
+    "D": [ "ReKebab" ],
+    "B": [ "D" ],
+    "Index": [ "B", "D", "Remath" ]
+  },
+  "ReKebab": { "Index": [] },
+  "Remath": { "Sum": [], "Index": [] }
+};
 
 const g = {
   nodes: [],
   edges: []
 }
 
-const statFiles = Object.keys(stats);
+const packages = Object.keys(stats)
+const thirdPartyPackages = packages.filter(x => x != "Src")
 
 var edgeCounter = 0;
 
-var allFiles = statFiles.length;
+var allFiles = packages.map(pkg => Object.keys(stats[pkg]).length).reduce((a, b) => a + b);
 
-statFiles.forEach((file, i) => {
-  g.nodes = g.nodes.concat({
-    id: 'n' + i,
-    label: file,
-    x: Math.cos(i/allFiles * Math.PI * 2) + Math.sqrt(allFiles),
-    y: Math.sin(i/allFiles * Math.PI * 2) + Math.sqrt(allFiles),
-    size: 8,
-    color: '#12ef21'
-  })
+packages.forEach((pkg, c) => {
+  const package = stats[pkg];
+  const packageFiles = Object.keys(package)
+  const filesCount = packageFiles.length;
 
-  stats[file].forEach(dep => {
-    g.edges = g.edges.concat({
-      id: 'e' + edgeCounter,
-      source: 'n' + statFiles.indexOf(dep),
-      target: 'n' + i,
-      arrow: "target",
-      type: "arrow",
-      size: 6,
-      color: '#a123d2'
+  if (pkg != "Src") {
+    g.nodes = g.nodes.concat({
+      id: pkg,
+      label: pkg,
+      x: Math.sqrt(filesCount) * c * c,
+      y: Math.sqrt(filesCount) * c * c,
+      size: 8,
+      color: '#12efef'
     })
-    edgeCounter += 1
+
+    packageFiles.forEach(file => {
+      g.edges = g.edges.concat({
+        id: 'e' + edgeCounter,
+        source: `${pkg}__${file}`,
+        target: pkg,
+        arrow: "target",
+        type: "arrow",
+        size: 6,
+        color: '#11e382'
+      })
+      edgeCounter += 1
+    })
+  }
+
+
+  packageFiles.forEach((file, i) => {
+    g.nodes = g.nodes.concat({
+      id: `${pkg}__${file}`,
+      label: file,
+      x: Math.cos(i/filesCount * Math.PI * 2) * Math.sqrt(allFiles) + c * c,
+      y: Math.sin(i/filesCount * Math.PI * 2) * Math.sqrt(allFiles) + c * c,
+      size: 8,
+      color: '#12ef21'
+    })
+
+    package[file].forEach(dep => {
+      g.edges = g.edges.concat({
+        id: 'e' + edgeCounter,
+        source: packageFiles.includes(dep) ? `${pkg}__${dep}` : dep,
+        target: `${pkg}__${file}`,
+        arrow: "target",
+        type: "arrow",
+        size: 6,
+        color: '#a123d2'
+      })
+      edgeCounter += 1
+    })
   })
 })
 
@@ -46,3 +86,8 @@ var s = new sigma({
 		minEdgeSize: 6
   }
 });
+
+s.startForceAtlas2({
+  // strongGravityMode: true
+});
+// s.stopForceAtlas2();
